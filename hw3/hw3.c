@@ -9,7 +9,8 @@ const char* shps[4]={"Club","Diamond","Heart","Spade"};
 typedef union{
     struct {
         unsigned shape: 2;
-        unsigned num: 6;
+        unsigned num: 4;
+        unsigned flag: 2;
     };
     u8 Card;
 }CardT;
@@ -90,20 +91,30 @@ void draw_crds(u8 n, CardT *crds){
 
 }
 
+
+
 //n:total card nums
 u8 straight_t(u8 n,CardT *crds){
     u8 i,j,cnt,sgt_cnt;
     cnt=1;
     sgt_cnt=0;
     for(i=1;i<n;i++){
-        if(crds[i].num==crds[i-1].num+1){
-            //printf("%d,%d\n",cnt,crds[i].num);
+        cnt=1;
+        //printf("%d\n",crds[i].num);
+        for(j=i;j<n;j++){
+            if(crds[j].num==crds[j-1].num) continue;
+            if(crds[j].num!=crds[j-1].num+1){
+                i=j;    
+                //printf(":%d\n",crds[i].num);
+                break;
+            }
+            //printf("%d,%d\n",cnt,crds[j].num);
             cnt++;
-        }
-        if(cnt==5){
-            sgt_cnt++;
-            cnt=1;
-            i++;
+            if(cnt>=5){
+                sgt_cnt++;
+                cnt=1;
+                break; 
+            }
         }
     }
     return sgt_cnt;
@@ -115,11 +126,11 @@ u8 fullh_t(int n, CardT *crds){
     u8 i,cnt,tmp_num,tri_cnt, dbl_cnt;
     cnt=1;tri_cnt=0;dbl_cnt=0;tmp_num=crds[0].num;
     for(i=1;i<n;i++ ){
-       if(crds[i].num!=tmp_num){
+        if(crds[i].num!=tmp_num){
             cnt=1;
             tmp_num=crds[i].num;
             continue;
-       }
+        }
         cnt++;
         if(cnt==2){
             i++;
@@ -133,8 +144,11 @@ u8 fullh_t(int n, CardT *crds){
         }
     }
     
-    return ((dbl_cnt-tri_cnt)>=0)?dbl_cnt:tri_cnt;
+    return dbl_cnt + (tri_cnt-1)*3*tri_cnt;
 }
+
+
+
 u8 fourk_t(int n, CardT *crds){
     u8 i,cnt,tmp_num,qua_cnt;
     cnt=1;qua_cnt=0;tmp_num=crds[0].num;
@@ -148,7 +162,6 @@ u8 fourk_t(int n, CardT *crds){
         if(cnt==4){
             qua_cnt++;
         }
-        if(qua_cnt==2)break;
     }
     return qua_cnt; 
 }
@@ -174,9 +187,9 @@ u8 pair_t(int n, CardT *crds){
 int main()
 {
     srandom(time(NULL));
-    CardT set4strt[13]={{0,1},{0,2},{1,3},{3,4},{1,5},{1,6},{1,7},{1,8},{1,9},{1,10},{1,11},{1,12},{1,13}};
-    CardT set4fh[13]={{0,1},{0,1},{1,1},{3,2},{1,2},{1,6},{1,7},{1,8},{1,7},{1,7},{1,11},{1,8},{1,13}};
-    CardT set4f[13]={{0,1},{0,1},{1,1},{3,1},{1,2},{1,6},{1,7},{1,8},{1,9},{1,10},{1,11},{1,12},{1,13}};
+    CardT set4strt[13]={{0,1},{0,2},{1,3},{3,4},{1,5},{1,6},{2,6},{1,8},{1,9},{1,10},{1,11},{1,12},{0,12}};
+    CardT set4fh[13]={{0,1},{0,1},{1,1},{3,2},{1,2},{1,6},{1,7},{1,8},{0,7},{3,7},{1,11},{1,8},{0,12}};
+    CardT set4f[13]={{0,1},{2,1},{1,1},{3,1},{1,2},{1,6},{1,7},{1,8},{1,9},{3,12},{2,12},{1,12},{0,12}};
     
     u8 strt_rslt,fh_rslt,fourk_rslt,pr_rslt;
     u8 flag,sgt=1,flsh=1,trp_0,trp_1,fh_0,fh_1,fk_0,fk_1;
